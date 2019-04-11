@@ -12,19 +12,19 @@ Usage: import the module (see Jupyter notebooks for examples), or run from
        the command line as such:
 
     # Train a new model starting from pre-trained COCO weights
-    python3 coco.py train --dataset=/path/to/coco/ --model=coco
+    python3 coco.py train --datasets=/path/to/coco/ --model=coco
 
-    # Train a new model starting from ImageNet weights. Also auto download COCO dataset
-    python3 coco.py train --dataset=/path/to/coco/ --model=imagenet --download=True
+    # Train a new model starting from ImageNet weights. Also auto download COCO datasets
+    python3 coco.py train --datasets=/path/to/coco/ --model=imagenet --download=True
 
     # Continue training a model that you had trained earlier
-    python3 coco.py train --dataset=/path/to/coco/ --model=/path/to/weights.h5
+    python3 coco.py train --datasets=/path/to/coco/ --model=/path/to/weights.h5
 
     # Continue training the last model you trained
-    python3 coco.py train --dataset=/path/to/coco/ --model=last
+    python3 coco.py train --datasets=/path/to/coco/ --model=last
 
     # Run COCO evaluatoin on the last model you trained
-    python3 coco.py evaluate --dataset=/path/to/coco/ --model=last
+    python3 coco.py evaluate --datasets=/path/to/coco/ --model=last
 """
 
 import os
@@ -71,7 +71,7 @@ DEFAULT_DATASET_YEAR = "2014"
 class CocoConfig(Config):
     """Configuration for training on MS COCO.
     Derives from the base Config class and overrides values specific
-    to the COCO dataset.
+    to the COCO datasets.
     """
     # Give the configuration a recognizable name
     NAME = "coco"
@@ -94,10 +94,10 @@ class CocoConfig(Config):
 class CocoDataset(utils.Dataset):
     def load_coco(self, dataset_dir, subset, year=DEFAULT_DATASET_YEAR, class_ids=None,
                   class_map=None, return_coco=False, auto_download=False):
-        """Load a subset of the COCO dataset.
-        dataset_dir: The root directory of the COCO dataset.
+        """Load a subset of the COCO datasets.
+        dataset_dir: The root directory of the COCO datasets.
         subset: What to load (train, val, minival, valminusminival)
-        year: What dataset year to load (2014, 2017) as a string, not an integer
+        year: What datasets year to load (2014, 2017) as a string, not an integer
         class_ids: If provided, only loads images that have the given classes.
         class_map: TODO: Not implemented yet. Supports maping classes from
             different datasets to the same class ID.
@@ -146,10 +146,10 @@ class CocoDataset(utils.Dataset):
             return coco
 
     def auto_download(self, dataDir, dataType, dataYear):
-        """Download the COCO dataset/annotations if requested.
-        dataDir: The root directory of the COCO dataset.
+        """Download the COCO datasets/annotations if requested.
+        dataDir: The root directory of the COCO datasets.
         dataType: What to load (train, val, minival, valminusminival)
-        dataYear: What dataset year to load (2014, 2017) as a string, not an integer
+        dataYear: What datasets year to load (2014, 2017) as a string, not an integer
         Note:
             For 2014, use "train", "val", "minival", or "valminusminival"
             For 2017, only "train" and "val" annotations are available
@@ -341,11 +341,11 @@ def build_coco_results(dataset, image_ids, rois, class_ids, scores, masks):
 
 def evaluate_coco(model, dataset, coco, eval_type="bbox", limit=0, image_ids=None):
     """Runs official COCO evaluation.
-    dataset: A Dataset object with valiadtion data
+    datasets: A Dataset object with valiadtion data
     eval_type: "bbox" or "segm" for bounding box or segmentation evaluation
     limit: if not 0, it's the number of images to use for evaluation
     """
-    # Pick COCO images from the dataset
+    # Pick COCO images from the datasets
     image_ids = image_ids or dataset.image_ids
 
     # Limit to a subset
@@ -405,13 +405,13 @@ if __name__ == '__main__':
     parser.add_argument("command",
                         metavar="<command>",
                         help="'train' or 'evaluate' on MS COCO")
-    parser.add_argument('--dataset', required=True,
+    parser.add_argument('--datasets', required=True,
                         metavar="/path/to/coco/",
-                        help='Directory of the MS-COCO dataset')
+                        help='Directory of the MS-COCO datasets')
     parser.add_argument('--year', required=False,
                         default=DEFAULT_DATASET_YEAR,
                         metavar="<year>",
-                        help='Year of the MS-COCO dataset (2014 or 2017) (default=2014)')
+                        help='Year of the MS-COCO datasets (2014 or 2017) (default=2014)')
     parser.add_argument('--model', required=True,
                         metavar="/path/to/weights.h5",
                         help="Path to weights .h5 file or 'coco'")
@@ -475,7 +475,7 @@ if __name__ == '__main__':
 
     # Train or evaluate
     if args.command == "train":
-        # Training dataset. Use the training set and 35K from the
+        # Training datasets. Use the training set and 35K from the
         # validation set, as as in the Mask RCNN paper.
         dataset_train = CocoDataset()
         dataset_train.load_coco(args.dataset, "train", year=args.year, auto_download=args.download)
@@ -483,7 +483,7 @@ if __name__ == '__main__':
             dataset_train.load_coco(args.dataset, "valminusminival", year=args.year, auto_download=args.download)
         dataset_train.prepare()
 
-        # Validation dataset
+        # Validation datasets
         dataset_val = CocoDataset()
         val_type = "val" if args.year in '2017' else "minival"
         dataset_val.load_coco(args.dataset, val_type, year=args.year, auto_download=args.download)
@@ -522,7 +522,7 @@ if __name__ == '__main__':
                     augmentation=augmentation)
 
     elif args.command == "evaluate":
-        # Validation dataset
+        # Validation datasets
         dataset_val = CocoDataset()
         val_type = "val" if args.year in '2017' else "minival"
         coco = dataset_val.load_coco(args.dataset, val_type, year=args.year, return_coco=True, auto_download=args.download)

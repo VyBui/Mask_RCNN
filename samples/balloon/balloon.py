@@ -1,6 +1,6 @@
 """
 Mask R-CNN
-Train on the toy Balloon dataset and implement color splash effect.
+Train on the toy Balloon datasets and implement color splash effect.
 
 Copyright (c) 2018 Matterport, Inc.
 Licensed under the MIT License (see LICENSE for details)
@@ -12,13 +12,13 @@ Usage: import the module (see Jupyter notebooks for examples), or run from
        the command line as such:
 
     # Train a new model starting from pre-trained COCO weights
-    python3 balloon.py train --dataset=/path/to/balloon/dataset --weights=coco
+    python3 balloon.py train --datasets=/path/to/balloon/datasets --weights=coco
 
     # Resume training a model that you had trained earlier
-    python3 balloon.py train --dataset=/path/to/balloon/dataset --weights=last
+    python3 balloon.py train --datasets=/path/to/balloon/datasets --weights=last
 
     # Train a new model starting from ImageNet weights
-    python3 balloon.py train --dataset=/path/to/balloon/dataset --weights=imagenet
+    python3 balloon.py train --datasets=/path/to/balloon/datasets --weights=imagenet
 
     # Apply color splash to an image
     python3 balloon.py splash --weights=/path/to/weights/file.h5 --image=<URL or path to file>
@@ -55,7 +55,7 @@ DEFAULT_LOGS_DIR = os.path.join(ROOT_DIR, "logs")
 
 
 class BalloonConfig(Config):
-    """Configuration for training on the toy  dataset.
+    """Configuration for training on the toy  datasets.
     Derives from the base Config class and overrides some values.
     """
     # Give the configuration a recognizable name
@@ -82,14 +82,14 @@ class BalloonConfig(Config):
 class BalloonDataset(utils.Dataset):
 
     def load_balloon(self, dataset_dir, subset):
-        """Load a subset of the Balloon dataset.
-        dataset_dir: Root directory of the dataset.
+        """Load a subset of the Balloon datasets.
+        dataset_dir: Root directory of the datasets.
         subset: Subset to load: train or val
         """
         # Add classes. We have only one class to add.
         self.add_class("balloon", 1, "balloon")
 
-        # Train or validation dataset?
+        # Train or validation datasets?
         assert subset in ["train", "val"]
         dataset_dir = os.path.join(dataset_dir, subset)
 
@@ -129,7 +129,7 @@ class BalloonDataset(utils.Dataset):
 
             # load_mask() needs the image size to convert polygons to masks.
             # Unfortunately, VIA doesn't include it in JSON, so we must read
-            # the image. This is only managable since the dataset is tiny.
+            # the image. This is only managable since the datasets is tiny.
             image_path = os.path.join(dataset_dir, a['filename'])
             image = skimage.io.imread(image_path)
             height, width = image.shape[:2]
@@ -148,7 +148,7 @@ class BalloonDataset(utils.Dataset):
             one mask per instance.
         class_ids: a 1D array of class IDs of the instance masks.
         """
-        # If not a balloon dataset image, delegate to parent class.
+        # If not a balloon datasets image, delegate to parent class.
         image_info = self.image_info[image_id]
         if image_info["source"] != "balloon":
             return super(self.__class__, self).load_mask(image_id)
@@ -178,18 +178,18 @@ class BalloonDataset(utils.Dataset):
 
 def train(model):
     """Train the model."""
-    # Training dataset.
+    # Training datasets.
     dataset_train = BalloonDataset()
-    dataset_train.load_balloon(args.dataset, "train")
+    dataset_train.load_balloon(args.datasets, "train")
     dataset_train.prepare()
 
-    # Validation dataset
+    # Validation datasets
     dataset_val = BalloonDataset()
-    dataset_val.load_balloon(args.dataset, "val")
+    dataset_val.load_balloon(args.datasets, "val")
     dataset_val.prepare()
 
     # *** This training schedule is an example. Update to your needs ***
-    # Since we're using a very small dataset, and starting from
+    # Since we're using a very small datasets, and starting from
     # COCO trained weights, we don't need to train too long. Also,
     # no need to train all layers, just the heads should do it.
     print("Training network heads")
@@ -284,9 +284,9 @@ if __name__ == '__main__':
     parser.add_argument("command",
                         metavar="<command>",
                         help="'train' or 'splash'")
-    parser.add_argument('--dataset', required=False,
-                        metavar="/path/to/balloon/dataset/",
-                        help='Directory of the Balloon dataset')
+    parser.add_argument('--datasets', required=False,
+                        metavar="/path/to/balloon/datasets/",
+                        help='Directory of the Balloon datasets')
     parser.add_argument('--weights', required=True,
                         metavar="/path/to/weights.h5",
                         help="Path to weights .h5 file or 'coco'")
@@ -304,13 +304,14 @@ if __name__ == '__main__':
 
     # Validate arguments
     if args.command == "train":
-        assert args.dataset, "Argument --dataset is required for training"
+        assert args.datasets, "Argument --datasets is required for training"
     elif args.command == "splash":
         assert args.image or args.video,\
                "Provide --image or --video to apply color splash"
 
     print("Weights: ", args.weights)
-    print("Dataset: ", args.dataset)
+    print(args.datasets)
+    print("Dataset: ", args.datasets)
     print("Logs: ", args.logs)
 
     # Configurations

@@ -1,6 +1,6 @@
 """
 Mask R-CNN
-Configurations and data loading code for the synthetic Shapes dataset.
+Configurations and data loading code for the synthetic Shapes datasets.
 This is a duplicate of the code in the noteobook train_shapes.ipynb for easy
 import into other notebooks, such as inspect_model.ipynb.
 
@@ -26,9 +26,9 @@ from mrcnn import utils
 
 
 class ShapesConfig(Config):
-    """Configuration for training on the toy shapes dataset.
+    """Configuration for training on the toy shapes datasets.
     Derives from the base Config class and overrides values specific
-    to the toy shapes dataset.
+    to the toy shapes datasets.
     """
     # Give the configuration a recognizable name
     NAME = "shapes"
@@ -61,7 +61,7 @@ class ShapesConfig(Config):
 
 
 class ShapesDataset(utils.Dataset):
-    """Generates the shapes synthetic dataset. The dataset consists of simple
+    """Generates the shapes synthetic datasets. The datasets consists of simple
     shapes (triangles, squares, circles) placed randomly on a blank surface.
     The images are generated on the fly. No file access required.
     """

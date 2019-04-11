@@ -12,19 +12,19 @@ Usage: import the module (see Jupyter notebooks for examples), or run from
        the command line as such:
 
     # Train a new model starting from pre-trained COCO weights
-    python3 coco.py train --dataset=/path/to/coco/ --model=coco
+    python3 coco.py train --datasets=/path/to/coco/ --model=coco
 
-    # Train a new model starting from ImageNet weights. Also auto download COCO dataset
-    python3 coco.py train --dataset=/path/to/coco/ --model=imagenet --download=True
+    # Train a new model starting from ImageNet weights. Also auto download COCO datasets
+    python3 coco.py train --datasets=/path/to/coco/ --model=imagenet --download=True
 
     # Continue training a model that you had trained earlier
-    python3 coco.py train --dataset=/path/to/coco/ --model=/path/to/weights.h5
+    python3 coco.py train --datasets=/path/to/coco/ --model=/path/to/weights.h5
 
     # Continue training the last model you trained
-    python3 coco.py train --dataset=/path/to/coco/ --model=last
+    python3 coco.py train --datasets=/path/to/coco/ --model=last
 
     # Run COCO evaluatoin on the last model you trained
-    python3 coco.py evaluate --dataset=/path/to/coco/ --model=last
+    python3 coco.py evaluate --datasets=/path/to/coco/ --model=last
 """
 
 import os
@@ -55,7 +55,7 @@ DEFAULT_LOGS_DIR = os.path.join(ROOT_DIR, "logs")
 
 class PotholeConfig(Config):
     """
-    Configuration for training on the toy dataset.
+    Configuration for training on the toy datasets.
     Derives from base config class and overrides some values
     """
     # Give the configuration a recognizable name
@@ -80,16 +80,17 @@ class PotholeConfig(Config):
 class PotholeDataset(utils.Dataset):
     def load_pothole(self, dataset_dir, subset):
         """
-        Load a subset of pothole dataset.
-        :param dataset_dir: Root directory of the dataset
+        Load a subset of pothole datasets.
+        :param dataset_dir: Root directory of the datasets
         :param subset: Subset to load: train or val
         """
         # Add class, we have a only class to add
         self.add_class("pothole", 1, "pothole")
 
-        # Train or eval dataset?
-        assert subset in ["train", "eval"]
-        data_dir = os.path.join(dataset_dir, subset)
+        # Train or eval datasets?
+        assert subset in ["train", "val"]
+        print ("what the hell is subset")
+        dataset_dir = os.path.join(dataset_dir, subset)
         # Load annotations
         # VGG Image Annotator (up to version 1.6) saves each image in the form:
         # { 'filename': '28503151_5b5b7ec140_b.jpg',
@@ -127,7 +128,7 @@ class PotholeDataset(utils.Dataset):
 
                 # load_mask() needs the image size to convert polygons to masks.
                 # Unfortunately, VIA doesn't include it in JSON, so we must read
-                # the image. This is only managable since the dataset is tiny.
+                # the image. This is only managable since the datasets is tiny.
                 image_path = os.path.join(dataset_dir, a['filename'])
                 image = skimage.io.imread(image_path)
                 height, width = image.shape[:2]
@@ -177,24 +178,24 @@ class PotholeDataset(utils.Dataset):
 
 def train(model):
     """Train the model."""
-    # Training dataset.
+    # Training datasets.
     dataset_train = PotholeDataset()
-    dataset_train.load_pothole(args.dataset, "train")
+    dataset_train.load_pothole(args.datasets, "train")
     dataset_train.prepare()
 
-    # Validation dataset
+    # Validation datasets
     dataset_val = PotholeDataset()
-    dataset_val.load_pothole(args.dataset, "val")
+    dataset_val.load_pothole(args.datasets, "val")
     dataset_val.prepare()
 
     # *** This training schedule is an example. Update to your needs ***
-    # Since we're using a very small dataset, and starting from
+    # Since we're using a very small datasets, and starting from
     # COCO trained weights, we don't need to train too long. Also,
     # no need to train all layers, just the heads should do it.
     print("Training network heads")
     model.train(dataset_train, dataset_val,
                 learning_rate=config.LEARNING_RATE,
-                epochs=30,
+                epochs=5,
                 layers='heads')
 
 def color_splash(image, mask):
@@ -280,9 +281,9 @@ if __name__ == '__main__':
     parser.add_argument("command",
                         metavar="<command>",
                         help="'train' or 'splash'")
-    parser.add_argument('--dataset', required=False,
-                        metavar="/path/to/pothole/dataset/",
-                        help='Directory of the Pothole dataset')
+    parser.add_argument('--datasets', required=False,
+                        metavar="/path/to/pothole/datasets/",
+                        help='Directory of the Pothole datasets')
     parser.add_argument('--weights', required=True,
                         metavar="/path/to/weights.h5",
                         help="Path to weights .h5 file or 'coco'")
@@ -300,13 +301,13 @@ if __name__ == '__main__':
 
     # Validate arguments
     if args.command == "train":
-        assert args.dataset, "Argument --dataset is required for training"
+        assert args.datasets, "Argument --datasets is required for training"
     elif args.command == "splash":
         assert args.image or args.video,\
                "Provide --image or --video to apply color splash"
 
     print("Weights: ", args.weights)
-    print("Dataset: ", args.dataset)
+    print("Dataset: ", args.datasets)
     print("Logs: ", args.logs)
 
     # Configurations

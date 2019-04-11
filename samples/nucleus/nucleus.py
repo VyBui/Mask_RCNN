@@ -1,6 +1,6 @@
 """
 Mask R-CNN
-Train on the nuclei segmentation dataset from the
+Train on the nuclei segmentation datasets from the
 Kaggle 2018 Data Science Bowl
 https://www.kaggle.com/c/data-science-bowl-2018/
 
@@ -13,16 +13,16 @@ Usage: import the module (see Jupyter notebooks for examples), or run from
        the command line as such:
 
     # Train a new model starting from ImageNet weights
-    python3 nucleus.py train --dataset=/path/to/dataset --subset=train --weights=imagenet
+    python3 nucleus.py train --datasets=/path/to/datasets --subset=train --weights=imagenet
 
     # Train a new model starting from specific weights file
-    python3 nucleus.py train --dataset=/path/to/dataset --subset=train --weights=/path/to/weights.h5
+    python3 nucleus.py train --datasets=/path/to/datasets --subset=train --weights=/path/to/weights.h5
 
     # Resume training a model that you had trained earlier
-    python3 nucleus.py train --dataset=/path/to/dataset --subset=train --weights=last
+    python3 nucleus.py train --datasets=/path/to/datasets --subset=train --weights=last
 
     # Generate submission file
-    python3 nucleus.py detect --dataset=/path/to/dataset --subset=train --weights=<last or /path/to/weights.h5>
+    python3 nucleus.py detect --datasets=/path/to/datasets --subset=train --weights=<last or /path/to/weights.h5>
 """
 
 # Set matplotlib backend
@@ -64,7 +64,7 @@ DEFAULT_LOGS_DIR = os.path.join(ROOT_DIR, "logs")
 # Save submission files here
 RESULTS_DIR = os.path.join(ROOT_DIR, "results/nucleus/")
 
-# The dataset doesn't have a standard train/val split, so I picked
+# The datasets doesn't have a standard train/val split, so I picked
 # a variety of images to surve as a validation set.
 VAL_IMAGE_IDS = [
     "0c2550a23b8a0f29a7575de8c61690d3c31bc897dd5ba66caec201d201a278c2",
@@ -100,7 +100,7 @@ VAL_IMAGE_IDS = [
 ############################################################
 
 class NucleusConfig(Config):
-    """Configuration for training on the nucleus segmentation dataset."""
+    """Configuration for training on the nucleus segmentation datasets."""
     # Give the configuration a recognizable name
     NAME = "nucleus"
 
@@ -183,16 +183,16 @@ class NucleusInferenceConfig(NucleusConfig):
 class NucleusDataset(utils.Dataset):
 
     def load_nucleus(self, dataset_dir, subset):
-        """Load a subset of the nuclei dataset.
+        """Load a subset of the nuclei datasets.
 
-        dataset_dir: Root directory of the dataset
+        dataset_dir: Root directory of the datasets
         subset: Subset to load. Either the name of the sub-directory,
                 such as stage1_train, stage1_test, ...etc. or, one of:
                 * train: stage1_train excluding validation images
                 * val: validation images from VAL_IMAGE_IDS
         """
         # Add classes. We have one class.
-        # Naming the dataset nucleus, and the class nucleus
+        # Naming the datasets nucleus, and the class nucleus
         self.add_class("nucleus", 1, "nucleus")
 
         # Which subset?
@@ -254,12 +254,12 @@ class NucleusDataset(utils.Dataset):
 
 def train(model, dataset_dir, subset):
     """Train the model."""
-    # Training dataset.
+    # Training datasets.
     dataset_train = NucleusDataset()
     dataset_train.load_nucleus(dataset_dir, subset)
     dataset_train.prepare()
 
-    # Validation dataset
+    # Validation datasets
     dataset_val = NucleusDataset()
     dataset_val.load_nucleus(dataset_dir, "val")
     dataset_val.prepare()
@@ -370,7 +370,7 @@ def detect(model, dataset_dir, subset):
     submit_dir = os.path.join(RESULTS_DIR, submit_dir)
     os.makedirs(submit_dir)
 
-    # Read dataset
+    # Read datasets
     dataset = NucleusDataset()
     dataset.load_nucleus(dataset_dir, subset)
     dataset.prepare()
@@ -414,9 +414,9 @@ if __name__ == '__main__':
     parser.add_argument("command",
                         metavar="<command>",
                         help="'train' or 'detect'")
-    parser.add_argument('--dataset', required=False,
-                        metavar="/path/to/dataset/",
-                        help='Root directory of the dataset')
+    parser.add_argument('--datasets', required=False,
+                        metavar="/path/to/datasets/",
+                        help='Root directory of the datasets')
     parser.add_argument('--weights', required=True,
                         metavar="/path/to/weights.h5",
                         help="Path to weights .h5 file or 'coco'")
@@ -426,12 +426,12 @@ if __name__ == '__main__':
                         help='Logs and checkpoints directory (default=logs/)')
     parser.add_argument('--subset', required=False,
                         metavar="Dataset sub-directory",
-                        help="Subset of dataset to run prediction on")
+                        help="Subset of datasets to run prediction on")
     args = parser.parse_args()
 
     # Validate arguments
     if args.command == "train":
-        assert args.dataset, "Argument --dataset is required for training"
+        assert args.dataset, "Argument --datasets is required for training"
     elif args.command == "detect":
         assert args.subset, "Provide --subset to run prediction on"
 
